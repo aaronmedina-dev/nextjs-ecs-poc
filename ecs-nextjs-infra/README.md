@@ -1,21 +1,18 @@
-# Hosting a Next.js Application on AWS ECS + S3 with AWS CDK (TypeScript)
+# Hosting a Next.js Application on AWS ECS with AWS CDK (TypeScript)
 
-Aaron Medina | [GitHub](https://github.com/aaronmedina-dev) | [Linkedin](https://www.linkedin.com/in/aamedina/)
-
-This guide walks you through creating a Proof of Concept (PoC) to host a Next.js application on AWS ECS Fargate using two separate repositories (folders for this example): one for infrastructure and another for the application code and container image. 
-
-![NextJS - ECS+S3 PoC](assets/nextjs-ecs-poc.png)
+This guide walks you through creating a Proof of Concept (PoC) to host a Next.js application on AWS ECS Fargate using two separate repositories: one for infrastructure and another for the application code and container image. 
 
 ## **Architecture Overview**
 1. **Two Repositories**:
    - **Infrastructure Repository**: Defines AWS infrastructure using AWS CDK (TypeScript).
-   - **Application Repository**: Contains the Next.js app and Docker configuration (TypeScript).
-2. **AWS ECS Fargate**: Runs containerized Next.js application.
-3. **AWS S3**: Contains assets and static files.
+   - **Application Repository**: Contains the Next.js app and Docker configuration.
+2. **AWS ECS Fargate**: Runs containerized Next.js applications.
+3. **AWS S3**: Contains assets and static files
+3. **Best Practices**: Focus on scalability, security, and cost optimization.
 
 ---
 
-## **Infrastructure Repository - ecs-nextjs-infra**
+## **Infrastructure Repository**
 
 ### **File Structure**
 ```
@@ -136,7 +133,6 @@ Run the following commands to deploy the stack:
 cdk bootstrap
 cdk deploy
 ```
-Note that the container repo is already created. Else, spinning up of `tasks` will fail.
 
 ---
 
@@ -208,8 +204,7 @@ CMD ["npm", "start"]
 ```
 
 #### **4. Upload Static Assets to S3**
-
-You can either upload the files manually or use the AWS CLI to upload the `public` folder contents to the S3 bucket:
+Use the AWS CLI to upload the `public` folder contents to the S3 bucket:
 ```bash
 aws s3 sync public/assets/ s3://<bucket-name>/assets/
 aws s3 sync public/static/ s3://<bucket-name>/static/
@@ -237,7 +232,7 @@ const Home: React.FC = () => {
         }
     };
 
-    const bucketUrl = 'https://<bucket-url>.s3.<region>.amazonaws.com';
+    const bucketUrl = 'https://ecsnextjsinfrastack-assetsbucket5cb76180-dx3lkjozgh26.s3.<region>.amazonaws.com';
 
     useEffect(() => {
       fetch(`${bucketUrl}/static/data.json`)
@@ -565,24 +560,5 @@ After deploying the infrastructure and updating the ECS service, test the applic
 #### **6. Network Issues**
    - **Cause**: ECS tasks in private subnets may lack internet access to pull images.
    - **Fix**: Ensure the ECS tasks have access to the internet by attaching a NAT Gateway to the VPC or by configuring the ECS task to use a public subnet.
-
-### **7. CORS Configuration for S3 Bucket** ###
-
-You may encounter CORS-related error. By default, S3 denies cross-origin requests unless explicitly configured.
-
-To resolve the issue, you need to explicitly configure CORS to allow the necessary requests. Even if your intent is to "disable" CORS, the browser's default behavior requires you to add specific rules to handle cross-origin access.
-
-```bash
-aws s3api put-bucket-cors --bucket ecsnextjsinfrastack-assetsbucket5cb76180-dx3lkjozgh26 --cors-configuration '{
-  "CORSRules": [
-    {
-      "AllowedOrigins": ["*"],
-      "AllowedMethods": ["GET"],
-      "AllowedHeaders": ["*"],
-      "MaxAgeSeconds": 3000
-    }
-  ]
-}'
-```
 
 ---
