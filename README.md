@@ -12,6 +12,7 @@ This guide walks you through creating a Proof of Concept (PoC) to host a Next.js
    - **Application Repository**: Contains the Next.js app and Docker configuration (TypeScript).
 2. **AWS ECS Fargate**: Runs containerized Next.js application.
 3. **AWS S3**: Contains assets and static files.
+4. **AWS ECR**: Stores the container image for the Next.js application.
 
 ---
 
